@@ -12,6 +12,12 @@ enum UserRoles {
   ADMIN
 }
 
+enum MovieStatus {
+  COMING_SOON
+  NOW_SHOWING
+  ENDED
+}
+
 model User {
   id           String    @unique @default(uuid())
   email        String    @unique
@@ -29,4 +35,24 @@ model User {
   @@index([email])
   @@index([role])
   @@map("users")
+}
+
+model Movie {
+  id          String      @id @default(uuid())
+  title       String
+  description String      @db.Text
+  duration    Int
+  language    String
+  director    String
+  genre       String
+  releaseDate DateTime
+  posterUrl   String?
+  trailerUrl  String?
+  status      MovieStatus @default(COMING_SOON)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([status])
+  @@index([genre])
+  @@map("movies")
 }

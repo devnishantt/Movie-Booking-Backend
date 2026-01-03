@@ -18,7 +18,7 @@ interface SafeUser {
   lastLogin: Date;
 }
 
-export default class UserRepository extends BaseRepository {
+export default class UserRepository extends BaseRepository<User> {
   constructor() {
     super("User");
   }
