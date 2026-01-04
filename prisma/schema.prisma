@@ -56,3 +56,16 @@ model Movie {
   @@index([genre])
   @@map("movies")
 }
+
+model Theatre {
+  id         String   @id @default(uuid())
+  name       String
+  location   String
+  city       String
+  totalSeats Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([city])
+  @@map("theatres")
+}
