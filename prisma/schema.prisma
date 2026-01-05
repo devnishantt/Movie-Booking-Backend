@@ -18,6 +18,11 @@ enum MovieStatus {
   ENDED
 }
 
+enum SeatType {
+  STANDARD
+  PREMIUM
+}
+
 model User {
   id           String    @unique @default(uuid())
   email        String    @unique
@@ -51,6 +56,7 @@ model Movie {
   status      MovieStatus @default(COMING_SOON)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  Show Show[]
 
   @@index([status])
   @@index([genre])
@@ -65,7 +71,43 @@ model Theatre {
   totalSeats Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  seats Seat[]
+  show Show[]
 
   @@index([city])
   @@map("theatres")
+}
+
+
+model Seat {
+  id String @id @default(uuid())
+  theatreId String
+  theatre Theatre @relation(fields: [theatreId], references: [id], onDelete: Cascade)
+  row String
+  seatNumber Int
+  seatType SeatType @default(STANDARD)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([theatreId, row, seatNumber])
+  @@index([theatreId])
+  @@map("seats")
+}
+
+model Show {
+  id String @id @default(uuid())
+  movieId String
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  theatreId String
+  theatre Theatre @relation(fields: [theatreId], references: [id], onDelete: Cascade)
+  showTime DateTime
+  price Float
+  availableSeats Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([movieId])
+  @@index([theatreId])
+  @@index([showTime])
+  @@map("shows")
 }
