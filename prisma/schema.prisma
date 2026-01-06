@@ -23,6 +23,12 @@ enum SeatType {
   PREMIUM
 }
 
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
 model User {
   id           String    @unique @default(uuid())
   email        String    @unique
@@ -36,6 +42,7 @@ model User {
   refreshToken String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  bookings     Booking[]
 
   @@index([email])
   @@index([role])
@@ -56,7 +63,7 @@ model Movie {
   status      MovieStatus @default(COMING_SOON)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  Show Show[]
+  Show        Show[]
 
   @@index([status])
   @@index([genre])
@@ -71,23 +78,23 @@ model Theatre {
   totalSeats Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  seats Seat[]
-  show Show[]
+  seats      Seat[]
+  show       Show[]
 
   @@index([city])
   @@map("theatres")
 }
 
-
 model Seat {
-  id String @id @default(uuid())
-  theatreId String
-  theatre Theatre @relation(fields: [theatreId], references: [id], onDelete: Cascade)
-  row String
-  seatNumber Int
-  seatType SeatType @default(STANDARD)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(uuid())
+  theatreId    String
+  theatre      Theatre       @relation(fields: [theatreId], references: [id], onDelete: Cascade)
+  row          String
+  seatNumber   Int
+  seatType     SeatType      @default(STANDARD)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  bookingSeats BookingSeat[]
 
   @@unique([theatreId, row, seatNumber])
   @@index([theatreId])
@@ -95,19 +102,51 @@ model Seat {
 }
 
 model Show {
-  id String @id @default(uuid())
-  movieId String
-  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  theatreId String
-  theatre Theatre @relation(fields: [theatreId], references: [id], onDelete: Cascade)
-  showTime DateTime
-  price Float
+  id             String    @id @default(uuid())
+  movieId        String
+  movie          Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  theatreId      String
+  theatre        Theatre   @relation(fields: [theatreId], references: [id], onDelete: Cascade)
+  showTime       DateTime
+  price          Float
   availableSeats Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  bookings       Booking[]
 
   @@index([movieId])
   @@index([theatreId])
   @@index([showTime])
   @@map("shows")
+}
+
+model Booking {
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  showId       String
+  show         Show          @relation(fields: [showId], references: [id], onDelete: Cascade)
+  totalAmount  Float
+  status       BookingStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  bookingSeats BookingSeat[]
+
+  @@index([userId])
+  @@index([showId])
+  @@index([status])
+  @@map("bookings")
+}
+
+model BookingSeat {
+  id        String   @id @default(uuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  seatId    String
+  seat      Seat     @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([bookingId, seatId])
+  @@index([seatId])
+  @@map("bookingSeats")
 }
